@@ -41,6 +41,13 @@ class AndroidAptPlugin implements Plugin<Project> {
         def instrumentTestAptConfiguration = project.configurations.create(INSTRUMENT_TEST_TASK_NAME + 'Apt')
         instrumentTestAptConfiguration.extendsFrom project.configurations.getByName(INSTRUMENT_TEST_TASK_NAME + 'Compile')
 
+        def hasTestPlugin = project.plugins.hasPlugin AndroidTestPlugin
+        if (hasTestPlugin) {
+            def testAptConfiguration = project.configurations.create(TEST_TASK_NAME + 'Apt')
+            testAptConfiguration.extendsFrom project.configurations.getByName(TEST_TASK_NAME + 'Compile')
+        }
+
+
         project.afterEvaluate {
             variants.all { variant ->
                 def configuration = 'apt'
@@ -53,13 +60,9 @@ class AndroidAptPlugin implements Plugin<Project> {
                 applyApt(project, variant, INSTRUMENT_TEST_SOURCE_SET_NAME, processorPath)
             }
             
-            def hasTestPlugin = project.plugins.hasPlugin AndroidTestPlugin
             if (!hasTestPlugin) {
                 return;
             }
-
-            def testAptConfiguration = project.configurations.create(TEST_TASK_NAME + 'Apt')
-            testAptConfiguration.extendsFrom project.configurations.getByName(TEST_TASK_NAME + 'Compile')
 
             variants.testVariant.findAll { it }.each { variant ->
                 if (variant.buildType.name.equals(BuilderConstants.RELEASE)) {
