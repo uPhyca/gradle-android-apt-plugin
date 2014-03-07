@@ -14,8 +14,6 @@ import com.squareup.gradle.android.AndroidTestPlugin
 class AndroidAptPlugin implements Plugin<Project> {
 
     private static final String GENERATED_SOURCE_DIR = "source/generated"
-    private static final String INSTRUMENT_TEST_TASK_NAME = 'instrumentTest'
-    private static final String INSTRUMENT_TEST_SOURCE_SET_NAME = 'instrumentTest'
     private static final String TEST_TASK_NAME = 'test'
     private static final String TEST_SOURCE_SET_NAME = 'test'
 
@@ -38,8 +36,11 @@ class AndroidAptPlugin implements Plugin<Project> {
         def aptConfiguration = project.configurations.create('apt')
         aptConfiguration.extendsFrom project.configurations.getByName('compile')
 
-        def instrumentTestAptConfiguration = project.configurations.create(INSTRUMENT_TEST_TASK_NAME + 'Apt')
-        instrumentTestAptConfiguration.extendsFrom project.configurations.getByName(INSTRUMENT_TEST_TASK_NAME + 'Compile')
+        def androidTestTaskName = getAndroidTestTaskName(project)
+        def androidTestSourceSetName = getAndroidTestSourceSetName(project)
+
+        def androidTestAptConfiguration = project.configurations.create(androidTestTaskName + 'Apt')
+        androidTestAptConfiguration.extendsFrom project.configurations.getByName(androidTestTaskName + 'Compile')
 
         def hasTestPlugin = project.plugins.hasPlugin AndroidTestPlugin
         if (hasTestPlugin) {
@@ -55,9 +56,9 @@ class AndroidAptPlugin implements Plugin<Project> {
                 applyApt(project, variant, new File(variant.dirName).getName(), processorPath)
             }
             variants.testVariant.findAll { it }.each { variant ->
-                def configuration = "${INSTRUMENT_TEST_TASK_NAME}Apt"
+                def configuration = "${androidTestTaskName}Apt"
                 def processorPath = project.configurations["apt"].asPath + File.pathSeparator + project.configurations[configuration].asPath
-                applyApt(project, variant, INSTRUMENT_TEST_SOURCE_SET_NAME, processorPath)
+                applyApt(project, variant, androidTestSourceSetName, processorPath)
             }
             
             if (!hasTestPlugin) {
@@ -129,4 +130,48 @@ class AndroidAptPlugin implements Plugin<Project> {
             aptOutput.mkdirs()
         }
     }
+
+    // android gradle plugin 0.9.0 で instrumentTest が androidTest に変わったことへ対応するためのメソッド群
+    String getAndroidTestTaskName(Project project) {
+        return getNameByVersion(project, 0, 9, 'androidTest', 'instrumentTest')
+    }
+
+    String getAndroidTestSourceSetName(Project project) {
+        return getNameByVersion(project, 0, 9, 'androidTest', 'instrumentTest')
+    }
+
+    String getNameByVersion(Project project, int major, int minor, String newName, String oldName) {
+        def androidPluginVersion = getPluginVersion(project, "com.android.tools.build", "gradle")
+
+        if (androidPluginVersion == null) {
+            return newName
+        }
+        def vArray = androidPluginVersion.split("\\.")
+        if (vArray.length < 2) {
+            return NewName
+        }
+        if (major < Integer.parseInt(vArray[0])) {
+            return newName
+        }
+        if (major == Integer.parseInt(vArray[0]) && minor <= Integer.parseInt(vArray[1])) {
+            return newName
+        }
+        return oldName
+    }
+
+    String getPluginVersion(Project project, String group, String name) {
+        def Project targetProject = project
+        while (targetProject != null) {
+            def version
+            targetProject.buildscript.configurations.classpath.resolvedConfiguration.firstLevelModuleDependencies.each {
+                e-> if (e.moduleGroup.equals(group) && e.moduleName.equals(name)) {version = e.moduleVersion}
+            }
+            if (version != null) {
+                return version
+            }
+            targetProject = targetProject.parent
+        }
+        return null
+    }
+
 }
