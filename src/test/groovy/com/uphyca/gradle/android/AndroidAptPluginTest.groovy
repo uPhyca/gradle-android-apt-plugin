@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
-class AndroidTestPluginTest {
+class AndroidAptPluginTest {
   @Test public void pluginDetectsAppPlugin() {
     Project project = ProjectBuilder.builder().build();
     project.apply plugin: 'android'
