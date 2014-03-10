@@ -1,6 +1,6 @@
 language: java
 
-script: gradle build
+script: gradle assemble
 
 jdk:
   - openjdk7
