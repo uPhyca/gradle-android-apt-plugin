@@ -1,3 +1,6 @@
+[![Build Status](https://secure.travis-ci.org/uPhyca/gradle-android-apt-plugin.png?branch=master)](http://travis-ci.org/uPhyca/gradle-android-apt-plugin)
+
+
 Gradle Android APT Plugin
 ==================================
 
