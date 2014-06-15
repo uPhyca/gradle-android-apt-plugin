@@ -13,7 +13,6 @@ import com.squareup.gradle.android.AndroidTestPlugin
 
 class AndroidAptPlugin implements Plugin<Project> {
 
-    private static final String GENERATED_SOURCE_DIR = "source/generated"
     private static final String TEST_TASK_NAME = 'test'
     private static final String TEST_SOURCE_SET_NAME = 'test'
 
@@ -77,7 +76,7 @@ class AndroidAptPlugin implements Plugin<Project> {
     }
 
     def applyApt(project, variant, sourceSet, processorPath) {
-        def aptOutputDir = project.file(new File(project.buildDir, GENERATED_SOURCE_DIR))
+        def aptOutputDir = project.file(new File(project.buildDir, getGeneratedSourcesDir(project)))
         def aptOutput = new File(aptOutputDir, variant.dirName)
 
         project.android.sourceSets[sourceSet].java.srcDirs += aptOutput.getPath()
@@ -99,7 +98,7 @@ class AndroidAptPlugin implements Plugin<Project> {
     }
 
     def applyTestApt(project, variant, processorPath) {
-        def aptOutputDir = project.file(new File(project.buildDir, GENERATED_SOURCE_DIR))
+        def aptOutputDir = project.file(new File(project.buildDir, getGeneratedSourcesDir(project)))
         def aptOutput = new File(aptOutputDir, variant.dirName)
 
         //taken from https://github.com/JakeWharton/gradle-android-test-plugin
@@ -138,6 +137,10 @@ class AndroidAptPlugin implements Plugin<Project> {
 
     String getAndroidTestSourceSetName(Project project) {
         return getNameByVersion(project, 0, 9, 'androidTest', 'instrumentTest')
+    }
+
+    String getGeneratedSourcesDir(Project project) {
+        return getNameByVersion(project, 0, 11, 'generated/source/apt', 'source/apt_generated')
     }
 
     String getNameByVersion(Project project, int major, int minor, String newName, String oldName) {
