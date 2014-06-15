@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 0.9.4 *(2014-06-16)*
+----------------------------
+
+Updated; Support Android Gradle Plugin 0.11
+
+
 Version 0.9.3 *(2014-03-07)*
 ----------------------------
 
