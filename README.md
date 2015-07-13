@@ -1,3 +1,6 @@
+## DEPRECATED
+This project is now deprecated. Use https://bitbucket.org/hvisser/android-apt instead.
+
 [![Build Status](https://travis-ci.org/uPhyca/gradle-android-apt-plugin.png?branch=master)](http://travis-ci.org/uPhyca/gradle-android-apt-plugin)
 
 
